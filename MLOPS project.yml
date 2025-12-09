@@ -1,0 +1,146 @@
+MLOPS project
+Mission Statement
+🚀 Project: Tech Stack Advisor — ML-Powered Stack Recommendation App
+🧪 Lab : Containerize a ML App with Docker and Host it on Hugging Face Spaces
+🛠️ Step 1: Prerequisites
+Ensure you have:
+•	✅ Python installed
+•	✅ UV installed (Installation | uv)
+•	✅ Docker installed (https://www.docker.com/products/docker-desktop/)
+•	✅ Git installed
+•	✅ A Hugging Face account (sign up at https://huggingface.co/)
+•	✅ Basic familiarity with Python and ML
+⠀
+🧠 Tech Stack Advisor – ML App (with Docker & Hugging Face Deployment)
+Tech Stack Advisor is a hands-on machine learning project designed to teach you how to build, containerize, and deploy an ML-powered web application using Docker and Hugging Face Spaces.
+🎯 This project is part of the "Artificial Intelligence and Machine Learning (AI/ML) with Docker"course from School of DevOps.
+🚀 What You'll Learn
+•	Build and train a simple ML model using scikit-learn
+•	Containerize your app using a Dockerfile
+•	Push your Docker image to Docker Hub
+•	Deploy the Dockerized app on Hugging Face Spaces (free tier)
+📁 Project Structure
+1.	tech-stack-advisor/
+2.	├── app.py             # Gradio web app
+3.	├── train.py           # Script to train and save ML model
+4.	├── requirements.txt   # Python dependencies
+5.	├── Dockerfile         # Docker build file (added during the lab)
+6.	├── model.pkl          # Trained ML model (generated after training)
+7.	├── encoders.pkl       # Encoders for categorical inputs (generated after training)
+8.	├── LICENSE            # Apache 2.0 license
+9.	└── README.md          # This guide
+10.	 
+🧠 Step 1: Setup and Train Your ML Model
+1.	Fork the repository: https://github.com/docker-aiml/tech-stack-advisor
+2.	Clone your own fork of the repository
+1.	git clone https://github.com/<your-username>/tech-stack-advisor.git
+2.	cd tech-stack-advisor
+1.	Install dependencies
+setup virtual environment with uv
+1.	uv venv --python 3.11 
+2.	source .venv/bin/activate
+install dependencies
+1.	uv pip install -r requirements.txt
+1.	Train the model
+   pip install pandas
+
+1.	python train.py
+This creates:
+•	model.pkl: the trained ML model
+•	encoders.pkl: label encoders for input/output features
+🖥️ Step 2: Run the App Locally (Without Docker)
+1.	python app.py
+Visit the app in your browser at:
+1.	http://localhost:7860
+🐳 Step 3: Test Build the Docker Image Manually
+Bedore you start building an image, make sure that you have trained the model and generated model.pkl and encoders.pkl
+The following process is purely to get an understanding of how to build an image imperatively, using step by step guide, when you are new to building container images. If you are a at a pro level, skip this section and proceed directly to using Dockerfile next.
+1.	Run a dev container with python:3.11-slim base image to test build the image with
+1.	docker run -idt --name dev -p  7860:7860 python:3.11-slim bash
+1.	Copy the source code to the dev container launched above
+1.	docker cp . dev:/app
+1.	Connect to the container and build the app
+1.	docker exec -it dev bash
+2.	cd app
+3.	ls 
+4.	pip install -r requirements.txt
+1.	Test Launch the application
+1.	python app.py 
+At this time, you should be able to access the app at http://localhost:7860/ considering you have setup Docker Desktop locally.
+ 
+1.	At this time, you could exit out of the container and take a snapshot of this container to build your first version of container image. This is a imperative approach to build images.
+1.	# 1. stop the app using "^c" if its still running 
+2.	# 2. exit out of a container using "exit" or "^d"
+3.	 
+4.	# List your containers to find out your dev container which has the app 
+5.	docker ps
+6.	 
+7.	# From your workstation, convert this container into an image as 
+8.	docker container commit dev docker.io/xxxxxx/tech-stack-advisor:v1
+1.	You could also publish this image to registry
+1.	docker image ls 
+2.	 
+3.	docker login 
+4.	 
+5.	# replace xxxxxx with <your-dockerhub-username>
+6.	docker image push docker.io/xxxxxx/tech-stack-advisor:v1
+1.	Finally delete your dev container created to support this process
+1.	docker rm -f dev 
+This is a crude approach to building container images, however useful when you are getting started to understand the process, as this is the same process you would conver into code with Dockerfile next.
+🐳 Step 3: Add Docker Support
+Create a file named Dockerfile in the root of the project:
+1.	FROM python:3.11-slim
+2.	 
+3.	WORKDIR /app
+4.	 
+5.	COPY requirements.txt .
+6.	RUN pip install --no-cache-dir -r requirements.txt
+7.	 
+8.	COPY . .
+9.	 
+10.	EXPOSE 7860
+11.	 
+12.	CMD ["python", "app.py"]
+If you observe the Dockerfile, its nothing but the instructions you followed earlier while building the image step by step converted into the code. You could refer to the video lessons from the course to get a better understanding of what is Dockerfile and the instructions present in it.
+🔧 Step 4: Build a Docker Image with Dockerfile
+1.	Build the image
+1.	# replace xxxxxx with <your-dockerhub-username>
+2.	docker build -t docker.io/xxxxxx/tech-stack-advisor:v2 .
+1.	Run the container
+1.	# replace xxxxxx with <your-dockerhub-username>
+2.	docker run --name tsa -p 7860:7860 docker.io/xxxxxx/tech-stack-advisor:v2
+Visit: http://localhost:7860
+1.	Delete the container
+1.	docker rm -f tsa 
+☁️ Step 5: Publish to Docker Hub
+1.	Compare Docker Images
+1.	# replace xxxxxx with <your-dockerhub-username>
+2.	docker image history docker.io/xxxxxx/tech-stack-advisor:v1
+3.	docker image history docker.io/xxxxxx/tech-stack-advisor:v2
+1.	Login to Docker Hub (If not logged in already)
+1.	docker login
+1.	Tag the image
+1.	# replace xxxxxx with <your-dockerhub-username>
+2.	docker tag docker.io/xxxxxx/tech-stack-advisor:v2 docker.io/xxxxxx/tech-stack-advisor:latest
+where, replace xxxxxx with <your-dockerhub-username>
+1.	Push it
+1.	# replace xxxxxx with <your-dockerhub-username>
+2.	docker push docker.io/xxxxxx/tech-stack-advisor:v2
+3.	docker push docker.io/xxxxxx/tech-stack-advisor:latest
+🌐 Step 6: Deploy to Hugging Face Spaces
+1.	Go to huggingface.co/spaces
+2.	Click Create New Space
+3.	Select:
+•	SDK: Docker
+•	Repository: Link to your GitHub repo with the Dockerfile
+4.	Hugging Face will auto-build and deploy your container.
+✅ Result
+🎉 Your ML app is now hosted at:
+1.	https://huggingface.co/spaces/<your-username>/tech-stack-advisor
+🧠 Learning Objectives Recap
+By the end of this lab, learners will have:
+•	Trained and saved an ML model using Scikit-learn
+•	Built a UI with Gradio
+•	Containerized the app with Docker
+•	Deployed the container on Hugging Face Spaces using Docker
+⠀
